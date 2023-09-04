@@ -1,4 +1,5 @@
 "use client";
+import axios from "axios";
 // will remove when we use react query to get data, should also use forms?
 import { Button } from "@/components/ui/button";
 import { FC } from "react";
@@ -31,6 +32,8 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { dummyNotes, dummyConversation, sections } from "./constants";
+import { UserButton } from "@clerk/nextjs";
+import { useAmp } from "next/amp";
 // import { ReactMarkdown } from "react-markdown/lib/react-markdown";
 
 export type Note = {
@@ -38,6 +41,9 @@ export type Note = {
   text: string;
   editing: boolean;
 };
+
+// Loading animation?
+// const isLoading = form.formState.isSubmitting;
 
 const NoteTaker = () => {
   // Initialize state to hold the notes as an array of objects
@@ -53,7 +59,7 @@ const NoteTaker = () => {
   };
 
   const [conversation, setConversation] =
-    useState<ChatCompletionRequestMessage[]>(dummyConversation);
+    useState<ChatCompletionRequestMessage[]>([]);
 
   // Function to handle the reordering of notes after a drag
   const handleDragEnd = (result: { destination: any; source: any }) => {
@@ -65,31 +71,44 @@ const NoteTaker = () => {
     setNotes(reorderedNotes);
   };
 
-  const handleNewMessage = () => {
+  
+  const handleNewMessage = async () => {
+  
     // Add user's message to the conversation
-    setConversation([
+    const updatedConversation = [
       ...conversation,
       { role: ChatCompletionRequestMessageRoleEnum.User, content: userInput },
-    ]);
+    ];
 
-    // Add a dummy response from the bot
-    setTimeout(() => {
-      setConversation([
-        ...conversation,
-        {
-          role: ChatCompletionRequestMessageRoleEnum.User,
-          content: userInput,
-        },
-        {
-          role: ChatCompletionRequestMessageRoleEnum.Assistant,
-          content: "Test response",
-        },
-      ]);
-    }, 1000); // Delay to simulate response time
+     setConversation ((current) => [
+      ...current,
+      { role: ChatCompletionRequestMessageRoleEnum.User, content: userInput }
+     ]);
 
-    // Clear the input field after sending the message
+     // Clear the input field after sending the message
     setUserInput("");
+    
+    try {
+      // Make an API call to the OpenAI API with the updated conversation
+      const response = await axios.post("/api/conversation", {
+        messages: updatedConversation, // Pass the updated conversation history
+      });
+  
+      // Extract the bot's response from the API response
+      const botResponse = response.data;
+  
+      // Add the bot's response to the conversation
+      setConversation ((current) => [
+        ...current,
+        botResponse,
+      ]);
+    } catch (error) {
+      console.error("Error sending chat message:", error);
+      // Handle errors here
+    }
+    
   };
+  
 
   // Function to add a new note to the state
   const addNote = () => {
@@ -222,11 +241,14 @@ const ConversationSheet: React.FC<ConversationSheetProps> = (
 ) => (
   <Sheet>
     <SheetTrigger>
-      <Button className="flex items-center space-x-2 rounded bg-sky-600 px-4 py-2 hover:bg-sky-500">
-        <FileQuestion color="white" />
-        <p className="text-xl text-white">Ask</p>
-      </Button>
+    <UserButton afterSignOutUrl="/"/>
+    <Button className="flex items-center space-x-2 rounded bg-sky-600 px-4 py-2 hover:bg-sky-500">
+      <FileQuestion color="white" />
+      <p className="text-xl text-white">Ask</p>
+    </Button>
+      
     </SheetTrigger>
+    
     <SheetContent>
       <SheetHeader>
         <SheetTitle>Conversation with Copilot Bot</SheetTitle>
