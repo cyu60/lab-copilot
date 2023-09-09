@@ -1,11 +1,13 @@
 'use client'
 
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button'
 import axios from 'axios'
+import CreateNotebook from './testCreate';
 
 const testPage = () => {
 
-    async function fetchStudents() {
+    async function fetchStudents() { 
         try {
           const response = await axios.get('/api/student'); // Assuming your API route is named students.js (or .ts)
           const data = response.data;
@@ -15,9 +17,20 @@ const testPage = () => {
         }
       }
 
+      async function fetchNotebooks() {
+        try {
+          const response =  await axios.get('/api/notebook/getNotebooks');
+          const data = response.data;
+          console.log(data)
+        } catch (error) {
+          console.error('Error fetching notebooksL: ', error);
+        }
+      }
+
     return (
         <div>
-            <Button onClick={() => fetchStudents()}>Try GET api </Button>
+            <Button onClick={() => fetchNotebooks()}>Try GET api </Button>
+            <CreateNotebook/>
         </div>
     )
 

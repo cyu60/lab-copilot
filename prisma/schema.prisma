@@ -12,7 +12,7 @@ datasource db {
 }
 
 model Student {
-  id String @id @default(cuid()) //maybe need UserId from Clerk
+  id String @id  //maybe need UserId from Clerk
   name String 
   notebooks Notebook[]
 }
@@ -22,9 +22,11 @@ model Notebook {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
+  name String
+
   student Student @relation(fields: [studentId], references: [id])
   studentId String
-  
+
   pages Notelist[]
 }
 
