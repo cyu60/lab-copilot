@@ -2,7 +2,7 @@ import { PrismaClient} from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-export default async function POST(req: Request) {
+export async function POST(req: Request) {
     try {
 
         //get notebook connected to the slug and the userId, then use the notebook id as the referential
@@ -18,33 +18,44 @@ export default async function POST(req: Request) {
         const userId = "cll9mxl200000v338yxqhscps"
         
         const body = await req.json()
-        const {name} = body
+        const { name } = body
 
-        //check if notebook is created already:
-        /*
-        const notebookExists = await prisma.notebook.findFirst({
+        const { searchParams } = new URL(req.url);
+        const slug = searchParams.get("slug")
+
+        const currNotebook = await prisma.notebook.findFirst({
             where: {
-                name,
+                studentId: userId,
+                name: slug as string,
             }
         })
 
+        let currNotebookId = ""
+
+        if (currNotebook) {
+            currNotebookId = currNotebook.id
+        } else {
+            return new Response("Notebook does not exist", { status: 500});
+        }
+
+        /*
         if (notebookExists) {
             return new Response('Notebook already exists', {status: 409})
         }
         */
 
-        const notebook = await prisma.notelist.create({
+        const notelist = await prisma.notelist.create({
             data: {
-                notebookId: userId, 
+                notebookId: currNotebookId, 
                 name: name,
+                report: ""
             },
         });
 
-        console.log(notebook)
-        return new Response(JSON.stringify(notebook),{status: 201})
+        console.log(notelist)
+        return new Response(JSON.stringify(notelist), {status: 201})
 
     } catch (error) {
-        console.error('Error creating notebook:', error);
+        console.error('Error creating notelist:', error);
     }
-}
 }

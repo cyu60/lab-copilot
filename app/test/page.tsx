@@ -19,7 +19,7 @@ const testPage = () => {
 
       async function fetchNotebooks() {
         try {
-          const response =  await axios.get('/api/notebook/getNotebooks');
+          const response =  await axios.get('/api/getNotebooks');
           const data = response.data;
           console.log(data)
         } catch (error) {
