@@ -15,7 +15,7 @@ export async function GET(req: Request) {
 
         const createdNotebooks = await prisma.notebook.findMany({
             where: {
-                studentId: "cll9mxl200000v338yxqhscps", 
+                studentId: userId, 
             },
         });
 

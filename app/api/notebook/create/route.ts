@@ -38,6 +38,6 @@ export async function POST(req: Request) {
         return new Response(JSON.stringify(notebook),{status: 201})
 
     } catch (error) {
-        console.error('Error creating notebook:', error);
+        return new Response('Error creating notebook:', {status: 500});
     }
 }

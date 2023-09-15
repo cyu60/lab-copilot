@@ -1,7 +1,9 @@
 'use client'
 
-import { FC, useState } from 'react'
+import { FC, FormEvent, useState } from 'react'
 import axios from 'axios'
+import { Button } from '@/components/ui/button'
+import { Notelist } from '@prisma/client'
 
 interface PageProps {
     params: {
@@ -22,16 +24,27 @@ const page = ({ params }: PageProps) => {
 
     const [name, setName] = useState('');
 
-    const handleSubmit = async () => {
-  
-      try {
-        const response = await axios.post(`/api/notelist?slug=${slug}`, {name});
-        console.log('Notelist created:', response.data);
-  
-      } catch (error) {
-        console.error('Error creating notelist:', error);
-      }
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+
+        try {
+            const response = await axios.post(`/api/notelist/create?slug=${slug}`, { name });
+            console.log('Notelist created:', response.data);
+
+        } catch (error) {
+            console.error('Error creating notelist:', error);
+        }
     };
+
+    const fetchNotelist = async () => {
+        
+        try {
+            const response = await axios.get(`/api/getNotelists?slug=${slug}`);
+            console.log(response.data)
+        } catch (error) {
+            console.error('Error fetching notelist:', error);
+        }
+    }
 
     return (
         <div>
@@ -47,6 +60,9 @@ const page = ({ params }: PageProps) => {
                 </div>
                 <button type="submit">Create</button>
             </form>
+            <div>
+                <Button onClick={() => fetchNotelist()}>Try GET Notelist api </Button>
+            </div>
         </div>
     );
 }

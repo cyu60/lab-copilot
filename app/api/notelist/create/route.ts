@@ -15,6 +15,8 @@ export async function POST(req: Request) {
             //return new NextResponse("Unauthorized", { status: 401 });
         //}
 
+        //add stuff for adding post content
+
         const userId = "cll9mxl200000v338yxqhscps"
         
         const body = await req.json()

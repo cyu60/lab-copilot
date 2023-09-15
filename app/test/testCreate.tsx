@@ -4,10 +4,11 @@ import React, { useState } from 'react';
 function CreateNotebook() {
   const [name, setName] = useState('');
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 
+    event.preventDefault();
     try {
-      const response = await axios.post('/api/notebook', {name});
+      const response = await axios.post('/api/notebook/create', {name});
       console.log('Notebook created:', response.data);
 
       // Optionally, you can reset the form or perform other actions here.
