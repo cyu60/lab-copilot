@@ -27,12 +27,12 @@ const page = () => {
   const fetchNotes = async () => {
       
     try {
-        const response = await axios.get(`/api/getNotes?slug=${params.notelistId}`);
+        const response = await axios.get(`/api/getNotes?notelistId=${params.notelistId}`);
         console.log(response.data)
     } catch (error) {
         console.error('Error fetching notelist:', error);
     }
-    
+
 }
 
   return (

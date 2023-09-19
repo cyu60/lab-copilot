@@ -19,7 +19,7 @@ export async function GET(req: Request) {
 
         //current notebook information could maybe be cached
         const { searchParams } = new URL(req.url);
-        const slug = searchParams.get("slug")
+        const slug = searchParams.get("notelistId")
 
         const currNotelist = await prisma.notelist.findFirst({
             where: {

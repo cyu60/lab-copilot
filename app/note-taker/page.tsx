@@ -33,6 +33,8 @@ import {
 import { dummyNotes, dummyConversation, sections } from "./constants";
 // import { ReactMarkdown } from "react-markdown/lib/react-markdown";
 
+//import { Note } from "@prisma/client"
+
 export type Note = {
   id: number; //turn this id into the same id stored in the database
   text: string;

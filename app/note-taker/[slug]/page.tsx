@@ -10,9 +10,6 @@ interface PageProps {
         slug: string
     }
 }
-
-//can take in as a query (more useful for "get")
-
 //call get NoteList to display all the notelists on the side (cache these probably)
 
 //can just do longer routes to get actual notelists?
