@@ -1,0 +1,78 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model Student {
+  id String @id  //maybe need UserId from Clerk
+  name String 
+  notebooks Notebook[] 
+}
+
+model Notebook {
+  id String @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  name String
+
+  student Student @relation(fields: [studentId], references: [id])
+  studentId String
+
+  pages Notelist[]
+}
+
+model Notelist {
+  id String @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  
+  name String
+  
+  notebook Notebook @relation(fields: [notebookId], references: [id])
+  notebookId String
+
+  notes Note[]
+  report String
+  conversation Conversation?
+
+  @@index([name])
+}
+
+model Conversation{
+  id String @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  notelist Notelist @relation(fields: [notelistId], references: [id])
+  notelistId String @unique
+
+  systemPrompt String
+  initMessage String
+  messages Message[]
+}
+
+model Note{
+  id String @id @default(cuid())
+  createdAt DateTime @default(now())
+  content String 
+
+  notelist Notelist @relation(fields: [notelistId], references: [id])
+  notelistId String 
+}
+
+model Message{
+  id String @id @default(cuid())
+  createdAt DateTime @default(now())
+  content String 
+
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+  conversationId String
+}
