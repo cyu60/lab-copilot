@@ -1,7 +1,8 @@
 "use client";
 // will remove when we use react query to get data, should also use forms?
+import axios from "axios";
 import { Button } from "@/components/ui/button";
-import { FC } from "react";
+import { FC, useEffect } from "react";
 import {
   ArrowRight,
   FileQuestion,
@@ -11,7 +12,7 @@ import {
   SidebarIcon,
   StickyNoteIcon,
   X,
-} from "lucide-react";
+} from "../../node_modules/lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
@@ -31,6 +32,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { dummyNotes, dummyConversation, sections } from "./constants";
+import { UserButton } from "@clerk/nextjs";
 // import { ReactMarkdown } from "react-markdown/lib/react-markdown";
 
 //import { Note } from "@prisma/client"
@@ -46,16 +48,15 @@ const NoteTaker = () => {
   const [notes, setNotes] = useState<Note[]>(dummyNotes);
   const [userInput, setUserInput] = useState("");
 
-  const handleInputChange = (
-    e: {
-      target: { value: React.SetStateAction<string> };
-    },
-  ) => {
+  const handleInputChange = (e: {
+    target: { value: React.SetStateAction<string> };
+  }) => {
     setUserInput(e.target.value);
   };
 
-  const [conversation, setConversation] =
-    useState<ChatCompletionRequestMessage[]>(dummyConversation);
+  const [conversation, setConversation] = useState<
+    ChatCompletionRequestMessage[]
+  >([]);
 
   // Function to handle the reordering of notes after a drag
   const handleDragEnd = (result: { destination: any; source: any }) => {
@@ -67,31 +68,81 @@ const NoteTaker = () => {
     setNotes(reorderedNotes);
   };
 
-  const handleNewMessage = () => {
+  // const handleNewMessage = () => {
+  //   // Add user's message to the conversation
+  //   setConversation([
+  //     ...conversation,
+  //     { role: ChatCompletionRequestMessageRoleEnum.User,
+  //       content: userInput
+  //     },
+  //   ]);
+
+  //   try{
+
+  //   }
+
+  //   // Add a dummy response from the bot
+  //   setTimeout(() => {
+  //     setConversation([
+  //       ...conversation,
+  //       {
+  //         role: ChatCompletionRequestMessageRoleEnum.User,
+  //         content: userInput,
+  //       },
+  //       {
+  //         role: ChatCompletionRequestMessageRoleEnum.Assistant,
+  //         content: "Test response",
+  //       },
+  //     ]);
+  //   }, 1000); // Delay to simulate response time
+
+  //   // Clear the input field after sending the message
+  //   setUserInput("");
+  // };
+
+  const handleNewMessage = async () => {
     // Add user's message to the conversation
-    setConversation([
-      ...conversation,
-      { role: ChatCompletionRequestMessageRoleEnum.User, content: userInput },
-    ]);
+    const userMessage: ChatCompletionRequestMessage = {
+      role: ChatCompletionRequestMessageRoleEnum.User,
+      content: userInput,
+    };
 
-    // Add a dummy response from the bot
-    setTimeout(() => {
-      setConversation([
-        ...conversation,
-        {
-          role: ChatCompletionRequestMessageRoleEnum.User,
-          content: userInput,
-        },
-        {
-          role: ChatCompletionRequestMessageRoleEnum.Assistant,
-          content: "Test response",
-        },
-      ]);
-    }, 1000); // Delay to simulate response time
-
+    const newConversation = [...conversation, userMessage];
+    // setConversation([
+    //   ...conversation,
+    //   {
+    //     role: ChatCompletionRequestMessageRoleEnum.User,
+    //     content: userInput,
+    //   },
+    // ]);
+    // console.log(conversation)
     // Clear the input field after sending the message
     setUserInput("");
+    try {
+      // Make an API call to the OpenAI API
+      const response = await axios.post("/api/ask", {
+        messages: newConversation, // Pass the conversation history
+      });
+
+      // Extract the bot's response from the API response
+      const botResponse = response.data;
+
+      // Add the bot's response to the conversation
+      setConversation([...newConversation, botResponse]);
+    } catch (error) {
+      console.error("Error sending chat message:", error);
+      // Handle errors here
+    }
   };
+
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return null;
+  }
 
   // Function to add a new note to the state
   const addNote = () => {
@@ -118,6 +169,11 @@ const NoteTaker = () => {
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
       <ToastContainer></ToastContainer>
+      <div className="flex w-full justify-end">
+        <div>
+          <UserButton afterSignOutUrl="/" />
+        </div>
+      </div>
       <div className="min-h-screen bg-neutral-100 pb-10">
         <div className=" flex items-center justify-between p-4 shadow">
           <div className="flex items-center space-x-5">
@@ -167,7 +223,6 @@ const NoteTaker = () => {
           </div>
         </div>
       </div>
-      {/* </div> */}
     </DragDropContext>
   );
 };
@@ -219,9 +274,12 @@ type ConversationSheetProps = {
   handleNewMessage: () => void;
 };
 
-const ConversationSheet: React.FC<ConversationSheetProps> = (
-  { conversation, userInput, handleInputChange, handleNewMessage },
-) => (
+const ConversationSheet: React.FC<ConversationSheetProps> = ({
+  conversation,
+  userInput,
+  handleInputChange,
+  handleNewMessage,
+}) => (
   <Sheet>
     <SheetTrigger>
       <Button className="flex items-center space-x-2 rounded bg-sky-600 px-4 py-2 hover:bg-sky-500">

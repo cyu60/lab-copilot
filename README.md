@@ -4,6 +4,9 @@ Lab Copilot is powered by [Next.js](https://nextjs.org/), providing an intellige
 
 ## Getting Started
 
+Download  React:
+npm install --dev @types/react
+
 First, run the development server:
 
 ```bash
