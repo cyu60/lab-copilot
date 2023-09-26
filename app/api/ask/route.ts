@@ -32,7 +32,7 @@ export async function POST(
         const response = await openai.createChatCompletion({
             model: "gpt-3.5-turbo",
             messages: [{
-                'role':'system', 'content':'You are a lab assitant that helps students answer scientific questions by giving hints without giving specific answers.'
+                'role':'system', 'content':'You are a lab assistant that helps students answer scientific questions by giving hints without giving specific answers.'
             },...messages]
         });
 

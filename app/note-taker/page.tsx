@@ -7,6 +7,7 @@ import {
   ArrowRight,
   FileQuestion,
   FileSymlink,
+  ImagePlus,
   LucideMenu,
   PlusIcon,
   SidebarIcon,
@@ -45,6 +46,7 @@ const NoteTaker = () => {
   // Initialize state to hold the notes as an array of objects
   const [notes, setNotes] = useState<Note[]>(dummyNotes);
   const [userInput, setUserInput] = useState("");
+  const [photos, setPhotos] = useState<string[]>([]);
 
   const handleInputChange = (e: {
     target: { value: React.SetStateAction<string> };
@@ -133,6 +135,27 @@ const NoteTaker = () => {
     }
   };
 
+  const handleNewImage = async () => {
+    try {
+      setPhotos([]);
+
+      const response = await axios.post('/api/image');
+
+      const urls = response.data.map((image: { url: string }) => image.url);
+
+      setPhotos(urls);
+    } catch (error: any) {
+      if (error?.response?.status === 403) {
+        // proModal.onOpen();
+      } else {
+        toast.error("Something went wrong.");
+      }
+    // } finally {
+      // router.refresh();
+    // }
+    };
+  };
+
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => {
     setIsMounted(true);
@@ -183,6 +206,7 @@ const NoteTaker = () => {
             userInput={userInput}
             handleInputChange={handleInputChange}
             handleNewMessage={handleNewMessage}
+            handleNewImage={handleNewImage}
           />
         </div>
         {/* <div className="flex w-full flex-row"> */}
@@ -270,6 +294,7 @@ type ConversationSheetProps = {
   userInput: string;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleNewMessage: () => void;
+  handleNewImage: () => void;
 };
 
 const ConversationSheet: React.FC<ConversationSheetProps> = ({
@@ -277,6 +302,7 @@ const ConversationSheet: React.FC<ConversationSheetProps> = ({
   userInput,
   handleInputChange,
   handleNewMessage,
+  handleNewImage,
 }) => (
   <Sheet>
     <SheetTrigger>
@@ -323,6 +349,12 @@ const ConversationSheet: React.FC<ConversationSheetProps> = ({
             onClick={() => void handleNewMessage()}
           >
             <ArrowRight />
+          </Button>
+          <Button
+            className="ml-2 rounded bg-sky-600 px-4 py-2 text-white"
+            onClick={() => void handleNewImage()}
+          >
+            <ImagePlus />
           </Button>
         </div>
       </div>
