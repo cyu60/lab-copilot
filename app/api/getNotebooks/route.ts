@@ -1,17 +1,17 @@
 import { PrismaClient } from '@prisma/client';
+import { auth } from '@clerk/nextjs';
 
 const prisma = new PrismaClient();
 
 export async function GET(req: Request) {
     try {
-        //const { userId } = auth();
-        //if (!userId) {
-            //return new NextResponse("Unauthorized", { status: 401 });
-        //}
+        // Uncomment this when you integrate authentication
+        const { userId } = auth();
+        if (!userId) {
+            return new Response("Unauthorized", { status: 401 });
+        }
 
-        const userId = "cll9mxl200000v338yxqhscps";
-
-        let createdNotebookNames: string[] = []
+        //const userId = "cll9mxl200000v338yxqhscps"; // Hardcoded for now
 
         const createdNotebooks = await prisma.notebook.findMany({
             where: {
@@ -19,11 +19,10 @@ export async function GET(req: Request) {
             },
         });
 
-        createdNotebookNames = createdNotebooks.map((nb) => nb.name)
-
-        return new Response(JSON.stringify(createdNotebookNames), { status: 201 })
+        return new Response(JSON.stringify({ notebooks: createdNotebooks }), { status: 200 });
 
     } catch (error) {
         console.error('Error fetching notebook:', error);
+        return new Response("Internal Server Error", { status: 500 });
     }
 }
