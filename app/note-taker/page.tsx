@@ -139,7 +139,7 @@ const NoteTaker = () => {
     try {
       setPhotos([]);
 
-      const response = await axios.post('/api/image');
+      const response = await axios.post('/api/img',{prompt:userInput});
 
       const urls = response.data.map((image: { url: string }) => image.url);
 
