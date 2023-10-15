@@ -33,7 +33,9 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { dummyNotes, dummyConversation, sections } from "./constants";
+import { exportConcatenatedTextToJson } from "./dummynotes";
 import { UserButton } from "@clerk/nextjs";
+
 // import { ReactMarkdown } from "react-markdown/lib/react-markdown";
 
 export type Note = {
@@ -42,6 +44,8 @@ export type Note = {
   editing: boolean;
 };
 let url = "";
+
+
 
 const NoteTaker = () => {
   // Initialize state to hold the notes as an array of objects
@@ -79,13 +83,14 @@ const NoteTaker = () => {
     const wrapMessage: MessageWrapper = {message:userMessage, contentType:"text"};
 
     const wrappedConversation = [...conversation, wrapMessage];
-    
-    const newConversation = wrappedConversation.map((message) => {
-      if (message.contentType === "text") {
-        return message.message;
+    let newConversation = new Array<ChatCompletionRequestMessage>();
+
+    wrappedConversation.forEach((message) => {
+      if (message.contentType === "text" && message.message !== undefined) {
+        newConversation.push(message.message);
       }
-    })
-    console.log(newConversation)
+    });
+        console.log(newConversation)
     setUserInput("");
     try {
       // Make an API call to the OpenAI API
@@ -111,6 +116,8 @@ const NoteTaker = () => {
         const response = await axios.post('/api/img',{prompt:userInput});
 
         const url = response.data.map((image: { url: string }) => image.url);
+
+
 
         const wrapImage: MessageWrapper = {imageUrl:url, contentType:"image"};
 
@@ -163,6 +170,36 @@ const NoteTaker = () => {
     setNotes([...notes, newTable]);
   };
 
+  type YourComponentProps = {
+    dummyNotes: Note[];
+  };
+  
+  const YourComponent: React.FC<YourComponentProps> = ({ dummyNotes }) => {
+    const exportConcatenatedTextToJson = () => {
+      const concatenatedText = dummyNotes.map((note) => note.text).join('\n\n');
+      const blob = new Blob([concatenatedText], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+  
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'concatenated-text.json';
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+    };
+  
+    return (
+      <Button
+        className="flex items-center space-x-2 rounded bg-sky-600 px-4 py-2 hover-bg-sky-500"
+        onClick={exportConcatenatedTextToJson}
+      >
+        <FileSymlink color="white" />
+        <p className="text-xl text-white">Export</p>
+      </Button>
+    );
+  };  
+
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
       <ToastContainer></ToastContainer>
@@ -190,13 +227,7 @@ const NoteTaker = () => {
           <Sidebar></Sidebar>
         </div>
         <div className="absolute right-5 pt-5">
-          <Button
-            className="flex items-center space-x-2 rounded bg-sky-600 px-4 py-2 hover:bg-sky-500"
-            onClick={() => toast("Exporting... (TODO)")}
-          >
-            <FileSymlink color="white" />
-            <p className="text-xl text-white">Export</p>
-          </Button>
+          <YourComponent dummyNotes={dummyNotes}></YourComponent>
         </div>
         <div className="mt-16 flex flex-col items-center space-y-5 px-56">
           <div className="flex w-full max-w-3xl justify-center">
