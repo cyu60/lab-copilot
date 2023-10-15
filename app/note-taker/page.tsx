@@ -41,6 +41,7 @@ export type Note = {
   text: string;
   editing: boolean;
 };
+let url = "";
 
 const NoteTaker = () => {
   // Initialize state to hold the notes as an array of objects
@@ -55,7 +56,7 @@ const NoteTaker = () => {
   };
 
   const [conversation, setConversation] = useState<
-    ChatCompletionRequestMessage[]
+    MessageWrapper[]
   >([]);
 
   // Function to handle the reordering of notes after a drag
@@ -68,38 +69,6 @@ const NoteTaker = () => {
     setNotes(reorderedNotes);
   };
 
-  // const handleNewMessage = () => {
-  //   // Add user's message to the conversation
-  //   setConversation([
-  //     ...conversation,
-  //     { role: ChatCompletionRequestMessageRoleEnum.User,
-  //       content: userInput
-  //     },
-  //   ]);
-
-  //   try{
-
-  //   }
-
-  //   // Add a dummy response from the bot
-  //   setTimeout(() => {
-  //     setConversation([
-  //       ...conversation,
-  //       {
-  //         role: ChatCompletionRequestMessageRoleEnum.User,
-  //         content: userInput,
-  //       },
-  //       {
-  //         role: ChatCompletionRequestMessageRoleEnum.Assistant,
-  //         content: "Test response",
-  //       },
-  //     ]);
-  //   }, 1000); // Delay to simulate response time
-
-  //   // Clear the input field after sending the message
-  //   setUserInput("");
-  // };
-
   const handleNewMessage = async () => {
     // Add user's message to the conversation
     const userMessage: ChatCompletionRequestMessage = {
@@ -107,16 +76,16 @@ const NoteTaker = () => {
       content: userInput,
     };
 
-    const newConversation = [...conversation, userMessage];
-    // setConversation([
-    //   ...conversation,
-    //   {
-    //     role: ChatCompletionRequestMessageRoleEnum.User,
-    //     content: userInput,
-    //   },
-    // ]);
-    // console.log(conversation)
-    // Clear the input field after sending the message
+    const wrapMessage: MessageWrapper = {message:userMessage, contentType:"text"};
+
+    const wrappedConversation = [...conversation, wrapMessage];
+    
+    const newConversation = wrappedConversation.map((message) => {
+      if (message.contentType === "text") {
+        return message.message;
+      }
+    })
+    console.log(newConversation)
     setUserInput("");
     try {
       // Make an API call to the OpenAI API
@@ -125,36 +94,43 @@ const NoteTaker = () => {
       });
 
       // Extract the bot's response from the API response
+      
       const botResponse = response.data;
-
+      const wrapBotMessage: MessageWrapper = {message:botResponse, contentType:"text"};
       // Add the bot's response to the conversation
-      setConversation([...newConversation, botResponse]);
+      setConversation([...wrappedConversation, wrapBotMessage]);
+
     } catch (error) {
       console.error("Error sending chat message:", error);
       // Handle errors here
     }
   };
+    const handleNewImage = async () => {
+      try {
 
-  const handleNewImage = async () => {
-    try {
-      setPhotos([]);
+        const response = await axios.post('/api/img',{prompt:userInput});
 
-      const response = await axios.post('/api/img',{prompt:userInput});
+        const url = response.data.map((image: { url: string }) => image.url);
 
-      const urls = response.data.map((image: { url: string }) => image.url);
+        const wrapImage: MessageWrapper = {imageUrl:url, contentType:"image"};
 
-      setPhotos(urls);
-    } catch (error: any) {
-      if (error?.response?.status === 403) {
-        // proModal.onOpen();
-      } else {
-        toast.error("Something went wrong.");
-      }
-    // } finally {
-      // router.refresh();
-    // }
+        setConversation([...conversation, wrapImage]); //sending full array when only supposed to send image portion
+
+        console.log(conversation)
+
+        // setPhotos(url);
+        // url = urls;
+      } catch (error: any) {
+        if (error?.response?.status === 403) {
+          // proModal.onOpen();
+        } else {
+          toast.error("Something went wrong.");
+        }
+      // } finally {
+        // router.refresh();
+      // }
+      };
     };
-  };
 
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => {
@@ -290,12 +266,18 @@ const Sidebar: React.FC = () => {
 };
 
 type ConversationSheetProps = {
-  conversation: ChatCompletionRequestMessage[]; // Update this with the correct type of conversation
+  conversation: MessageWrapper[]; // Update this with the correct type of conversation
   userInput: string;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleNewMessage: () => void;
   handleNewImage: () => void;
 };
+
+interface MessageWrapper{
+  message ? :ChatCompletionRequestMessage;
+  contentType:String
+  imageUrl?:string;
+}
 
 const ConversationSheet: React.FC<ConversationSheetProps> = ({
   conversation,
@@ -321,16 +303,21 @@ const ConversationSheet: React.FC<ConversationSheetProps> = ({
             <div
               key={index}
               className={`p-2 ${
-                message.role === "assistant" ? "bg-neutral-100" : ""
+                message.message?.role === "assistant" ? "bg-neutral-100" : ""
               }`}
             >
+              {message.contentType === "image" && (<img src={message?.imageUrl} alt="no image"/>)}
               <strong>
-                {message.role === "assistant" ? "Copilot Bot" : "You"}:
+                {message.message?.role === "assistant" ? "Copilot Bot" : "You"}:
               </strong>{" "}
-              {message.content}
+              {message.message?.content}
             </div>
           ))}
         </div>
+       
+    
+        
+
         <div className="mt-4 flex">
           <input
             type="text"
@@ -361,6 +348,9 @@ const ConversationSheet: React.FC<ConversationSheetProps> = ({
     </SheetContent>
   </Sheet>
 );
+
+
+
 
 type NotesProps = {
   notes: Note[];

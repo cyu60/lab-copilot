@@ -35,6 +35,8 @@ export async function POST(
         size: resolution,
       });
 
+      console.log(response.data);
+
       return NextResponse.json(response.data.data);
   } catch (error){
       console.log('[IMAGE_ERROR]', error);
