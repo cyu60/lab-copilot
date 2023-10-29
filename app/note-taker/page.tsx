@@ -33,8 +33,8 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { dummyNotes, dummyConversation, sections } from "./constants";
-import { exportConcatenatedTextToJson } from "./dummynotes";
 import { UserButton } from "@clerk/nextjs";
+import { jsPDF } from "jspdf";
 
 // import { ReactMarkdown } from "react-markdown/lib/react-markdown";
 
@@ -175,27 +175,27 @@ const NoteTaker = () => {
   };
   
   const YourComponent: React.FC<YourComponentProps> = ({ dummyNotes }) => {
-    const exportConcatenatedTextToJson = () => {
+    const exportConcatenatedTextToPDF = () => {
+      // Create a new instance of jsPDF
+      const doc = new jsPDF();
+    
+      // Extract and concatenate the text from your notes
       const concatenatedText = dummyNotes.map((note) => note.text).join('\n\n');
-      const blob = new Blob([concatenatedText], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-  
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'concatenated-text.json';
-      a.style.display = 'none';
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
+    
+      // Add the concatenated text to the PDF
+      doc.text(concatenatedText, 10, 10);
+    
+      // Save or download the PDF
+      doc.save("notes.pdf");
     };
   
     return (
       <Button
         className="flex items-center space-x-2 rounded bg-sky-600 px-4 py-2 hover-bg-sky-500"
-        onClick={exportConcatenatedTextToJson}
+        onClick={exportConcatenatedTextToPDF}
       >
         <FileSymlink color="white" />
-        <p className="text-xl text-white">Export</p>
+        <p className="text-xl text-white">Export as PDF</p>
       </Button>
     );
   };  
