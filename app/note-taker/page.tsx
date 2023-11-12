@@ -35,6 +35,7 @@ import {
 import { dummyNotes, dummyConversation, sections } from "./constants";
 import { UserButton } from "@clerk/nextjs";
 import { jsPDF } from "jspdf";
+import Link from "next/link";
 
 // import { ReactMarkdown } from "react-markdown/lib/react-markdown";
 
@@ -42,6 +43,8 @@ export type Note = {
   id: number;
   text: string;
   editing: boolean;
+  name ?:string;
+  updatedAt ?:Date;
 };
 let url = "";
 
@@ -266,7 +269,9 @@ const Sidebar: React.FC = () => {
       </SheetTrigger>
       <SheetContent side={"left"}>
         <SheetHeader>
-          <SheetTitle>General Physics</SheetTitle>
+          <Link href="note-taker/courseDash">
+              <SheetTitle>General Physics</SheetTitle>
+          </Link>
         </SheetHeader>
         <div className=" p-4">
           {sections.map((section, idx) => (
