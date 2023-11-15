@@ -1,18 +1,8 @@
 'use client'
-import axios from "axios";
-import { Button } from "@/components/ui/button";
-import { FC, useEffect } from "react";
+import { useEffect } from "react";
 import {
   SidebarIcon,
 } from "../../../node_modules/lucide-react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-import {
-  ChatCompletionRequestMessage,
-  ChatCompletionRequestMessageRoleEnum,
-} from "openai";
-import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import React, { useState } from "react";
@@ -23,24 +13,26 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { UserButton } from "@clerk/nextjs";
-import { jsPDF } from "jspdf";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-//import Navbar from "@/components/Navbar";
-//import Sidebar from "@/components/Sidebar";
-import Empty from "@/components/Empty";
-import { dummyNotes } from "../dummynotes";
-// import Note from "./page"
-import { Note } from "../page"; 
+// import { Note } from "../page"; 
 import Link from "next/link";
-import { dummyConversation, sections } from ".././constants";
+import { sections } from ".././constants";
+
+export type Note = {
+  id: number;
+  text: string;
+  editing: boolean;
+  name?: string;
+  updatedAt?: Date;
+  completed?: "completed" | "inProgress" | "notCompleted";
+};
+
 
 type NotebookPreviewProps = {
   notebooks: Note[];
@@ -58,13 +50,35 @@ const NotebookPreview: React.FC<NotebookPreviewProps> = ({ notebooks }) => {
 
 
 
+// Inside the NotebookCard component
 const NotebookCard: React.FC<{ notebook: Note }> = ({ notebook }) => {
+  // Array of unique names for each card
+  const experimentTitles = [
+    "Data Analysis with Spreadsheets",
+    "Motion in One Dimension",
+    "Distraction and Reaction Time",
+    "The Glucometer A Study in Uncertainty",
+    // Add more titles as needed
+  ];
+
+  // Use the title based on the notebook's position in the array
+  const title = experimentTitles[notebook.id - 1];
+
   return (
     <Link href={`/notebook/${notebook.id}`}>
       <Card>
         <CardHeader>
-          <CardTitle>{notebook.name}</CardTitle>
-          <CardDescription>Last updated: {new Date(notebook.updatedAt!).toLocaleDateString()}</CardDescription>
+          <div>
+            <CardTitle style={{ fontSize: '14px' }}>{`Experiment ${notebook.id}`}</CardTitle>
+            {/* Add a line to divide the completion status and the experiment name */}
+            {/* Display the title under the experiment number */}
+            <CardDescription style={{ fontSize: '12px' }}>{title}</CardDescription>
+            {/* Display completion status with different colors */}
+            <div style={{ borderBottom: '1px solid #ccc', margin: '4px 0' }}></div>
+            <CardDescription style={{ fontSize: '12px', color: getCompletionStatusColor(notebook.completed) }}>
+              {getCompletionStatusText(notebook.completed)}
+            </CardDescription>
+          </div>
         </CardHeader>
         <CardContent>
           {/* Add additional notebook details here */}
@@ -74,26 +88,64 @@ const NotebookCard: React.FC<{ notebook: Note }> = ({ notebook }) => {
   );
 };
 
+// Helper function to get completion status text
+const getCompletionStatusText = (status: Note["completed"]): string => {
+  if (status === "completed") {
+    return 'Completed';
+  } else if (status === "inProgress") {
+    return 'In Progress';
+  } else {
+    return 'Not Started';
+  }
+};
+
+// Helper function to get completion status color
+const getCompletionStatusColor = (status: Note["completed"]): string => {
+  if (status === "completed") {
+    return 'blue'; // Completed is blue
+  } else if (status === "inProgress") {
+    return 'gray'; // In Progress is gray
+  } else {
+    return 'red'; // Not Completed is red
+  }
+};
+
+
 export const dumNotes: Note[] = [
   {
     id: 1,
     text: "placed the weight at the top of the incline\n\nused stopwatch and tape measure\n\nnoticed a change in velocity with different weights",
     editing: false,
     updatedAt: new Date(),
+    name: "Data Analysis with Spreadsheets",
+    completed: "completed", // Set completed to true for the first experiment
   },
   {
     id: 2,
     text: "placed the weight at the top of the incline\n\nused stopwatch and tape measure\n\nnoticed a change in velocity with different weights",
     editing: false,
     updatedAt: new Date(),
+    name: "Motion in One Dimension",
+    completed: "completed", // Set completed to false for the second experiment
   },
   {
     id: 3,
     text: "placed the weight at the top of the incline\n\nused stopwatch and tape measure\n\nnoticed a change in velocity with different weights",
     editing: false,
     updatedAt: new Date(),
+    name: "Distraction and Reaction Time",
+    completed: "inProgress", // Set completed to true for the third experiment
+  },
+  {
+    id: 4,
+    text: "placed the weight at the top of the incline\n\nused stopwatch and tape measure\n\nnoticed a change in velocity with different weights",
+    editing: false,
+    updatedAt: new Date(),
+    name: "The Glucometer A Study in Uncertainty",
+    completed: "notCompleted", // Set completed to true for the third experiment
   },
 ];
+
 
 const Sidebar: React.FC = () => {
   return (
@@ -102,11 +154,6 @@ const Sidebar: React.FC = () => {
         <SidebarIcon />
       </SheetTrigger>
       <SheetContent side={"left"}>
-        <SheetHeader>
-          <Link href="note-taker/courseDash">
-              <SheetTitle>General Physics</SheetTitle>
-          </Link>
-        </SheetHeader>
         <div className=" p-4">
           {sections.map((section, idx) => (
             <div key={idx} className="flex flex-col pb-2">
@@ -135,38 +182,54 @@ const Sidebar: React.FC = () => {
   );
 };
 
+// ... (previous imports)
+
+// Dashboard component
 export default function Dashboard() {
   const [notebooks, setNotebooks] = useState<Note[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchNotebooks = async () => {
-      // const res = await fetch('/api/getNotebooks');
-      // const body = await res.json();
-      setNotebooks(notebooks);
+      // Fetch notebooks from the API or another source
+      // For now, using the hardcoded data dumNotes
+      setNotebooks(dumNotes);
       setIsLoading(false);
     };
+
     if (typeof window !== "undefined") {
       fetchNotebooks();
     }
   }, []);
-  
+
   return (
     <div className="h-full relative">
-       <div className="absolute left-5 h-full border-r-2 pr-5 pt-5">
-          <Sidebar></Sidebar>
-        </div>
-      <div className="hidden h-full md:flex md:flex-col md:fixed md:inset-y-0 z-[80] bg-goodpink">
-        <div>
-          {/* <Sidebar></Sidebar> */}
-        </div>
+      <div className="bg-goodpink p-4 mb-4 text-white">
+        <Link href="../note-taker">
+          <h1 className="text-2xl font-bold text-black">
+            General Physics Lab
+          </h1>
+        </Link>
+        {/* Add a line below the title */}
+        <div className="border-b-2 border-black my-2"></div>
       </div>
-      <main className="md:pl-64">
-        {/* <Navbar></Navbar> */}
+      <div className="absolute left-5 h-full pr-5 pt-5 flex items-center"> {/* Add flex and items-center to center the Sidebar and the vertical line */}
+        {/* Add a black vertical line extending downward */}
+
+        {/* Render the Sidebar component */}
+        <Sidebar />
+      </div>
+      <main className="w-full md:pl-64 flex justify-center items-center"> {/* Add flex and justify-center to center the content */}
         <div>
-        <NotebookPreview notebooks={dumNotes} />
+          <NotebookPreview notebooks={dumNotes} />
         </div>
       </main>
     </div>
   );
 }
+
+
+
+
+
+
