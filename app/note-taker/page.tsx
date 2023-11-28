@@ -206,11 +206,6 @@ const NoteTaker = () => {
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
       <ToastContainer></ToastContainer>
-      <div className="flex w-full justify-end">
-        <div>
-          <UserButton afterSignOutUrl="/" />
-        </div>
-      </div>
       <div className="min-h-screen bg-neutral-100 pb-10">
         <div className=" flex items-center justify-between p-4 shadow">
           <div className="flex items-center space-x-5">
@@ -324,10 +319,16 @@ const ConversationSheet: React.FC<ConversationSheetProps> = ({
 }) => (
   <Sheet>
     <SheetTrigger>
+    <div className="flex w-full justify-end">
+        <div>
+          <UserButton afterSignOutUrl="/" />
+        </div>
+      </div>
       <Button className="flex items-center space-x-2 rounded bg-sky-600 px-4 py-2 hover:bg-sky-500">
         <FileQuestion color="white" />
         <p className="text-xl text-white">Ask</p>
       </Button>
+      
     </SheetTrigger>
     <SheetContent>
       <SheetHeader>

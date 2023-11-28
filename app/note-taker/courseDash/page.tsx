@@ -1,235 +1,283 @@
-'use client'
-import { useEffect } from "react";
-import {
-  SidebarIcon,
-} from "../../../node_modules/lucide-react";
-import "react-toastify/dist/ReactToastify.css";
+/**
+ * v0 by Vercel.
+ * @see https://v0.dev/t/1TrovUyGhOs
+ */
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { CardTitle, CardHeader, CardContent, Card } from "@/components/ui/card"
+import { BellIcon, InfoIcon } from "lucide-react"
+import { UserButton } from "@clerk/nextjs";
 
-import React, { useState } from "react";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-// import { Note } from "../page"; 
-import Link from "next/link";
-import { sections } from ".././constants";
-
-export type Note = {
-  id: number;
-  text: string;
-  editing: boolean;
-  name?: string;
-  updatedAt?: Date;
-  completed?: "completed" | "inProgress" | "notCompleted";
-};
-
-
-type NotebookPreviewProps = {
-  notebooks: Note[];
-};
-
-const NotebookPreview: React.FC<NotebookPreviewProps> = ({ notebooks }) => {
+export default function Component() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 md:pr-10">
-      {notebooks.map((notebook) => (
-        <NotebookCard key={notebook.id} notebook={notebook} />
-      ))}
-    </div>
-  );
-};
-
-
-
-// Inside the NotebookCard component
-const NotebookCard: React.FC<{ notebook: Note }> = ({ notebook }) => {
-  // Array of unique names for each card
-  const experimentTitles = [
-    "Data Analysis with Spreadsheets",
-    "Motion in One Dimension",
-    "Distraction and Reaction Time",
-    "The Glucometer A Study in Uncertainty",
-    // Add more titles as needed
-  ];
-
-  // Use the title based on the notebook's position in the array
-  const title = experimentTitles[notebook.id - 1];
-
-  return (
-    <Link href={`/notebook/${notebook.id}`}>
-      <Card>
-        <CardHeader>
-          <div>
-            <CardTitle style={{ fontSize: '14px' }}>{`Experiment ${notebook.id}`}</CardTitle>
-            {/* Add a line to divide the completion status and the experiment name */}
-            {/* Display the title under the experiment number */}
-            <CardDescription style={{ fontSize: '12px' }}>{title}</CardDescription>
-            {/* Display completion status with different colors */}
-            <div style={{ borderBottom: '1px solid #ccc', margin: '4px 0' }}></div>
-            <CardDescription style={{ fontSize: '12px', color: getCompletionStatusColor(notebook.completed) }}>
-              {getCompletionStatusText(notebook.completed)}
-            </CardDescription>
+    <div className="grid min-h-screen w-full lg:grid-cols-[280px_1fr] bg-blue-500">
+      <div className="hidden border-r bg-zinc-100/40 lg:block dark:bg-zinc-800/40">
+        <div className="flex flex-col gap-2">
+          <div className="flex h-[60px] items-center px-6">
+            <Link className="flex items-center gap-2 font-semibold text-white" href="../note-taker">
+              <span className="text-lg">General Physics Lab</span>
+            </Link>
           </div>
-        </CardHeader>
-        <CardContent>
-          {/* Add additional notebook details here */}
-        </CardContent>
-      </Card>
-    </Link>
-  );
-};
-
-// Helper function to get completion status text
-const getCompletionStatusText = (status: Note["completed"]): string => {
-  if (status === "completed") {
-    return 'Completed';
-  } else if (status === "inProgress") {
-    return 'In Progress';
-  } else {
-    return 'Not Started';
-  }
-};
-
-// Helper function to get completion status color
-const getCompletionStatusColor = (status: Note["completed"]): string => {
-  if (status === "completed") {
-    return 'blue'; // Completed is blue
-  } else if (status === "inProgress") {
-    return 'gray'; // In Progress is gray
-  } else {
-    return 'red'; // Not Completed is red
-  }
-};
-
-
-export const dumNotes: Note[] = [
-  {
-    id: 1,
-    text: "placed the weight at the top of the incline\n\nused stopwatch and tape measure\n\nnoticed a change in velocity with different weights",
-    editing: false,
-    updatedAt: new Date(),
-    name: "Data Analysis with Spreadsheets",
-    completed: "completed", // Set completed to true for the first experiment
-  },
-  {
-    id: 2,
-    text: "placed the weight at the top of the incline\n\nused stopwatch and tape measure\n\nnoticed a change in velocity with different weights",
-    editing: false,
-    updatedAt: new Date(),
-    name: "Motion in One Dimension",
-    completed: "completed", // Set completed to false for the second experiment
-  },
-  {
-    id: 3,
-    text: "placed the weight at the top of the incline\n\nused stopwatch and tape measure\n\nnoticed a change in velocity with different weights",
-    editing: false,
-    updatedAt: new Date(),
-    name: "Distraction and Reaction Time",
-    completed: "inProgress", // Set completed to true for the third experiment
-  },
-  {
-    id: 4,
-    text: "placed the weight at the top of the incline\n\nused stopwatch and tape measure\n\nnoticed a change in velocity with different weights",
-    editing: false,
-    updatedAt: new Date(),
-    name: "The Glucometer A Study in Uncertainty",
-    completed: "notCompleted", // Set completed to true for the third experiment
-  },
-];
-
-
-const Sidebar: React.FC = () => {
-  return (
-    <Sheet>
-      <SheetTrigger>
-        <SidebarIcon />
-      </SheetTrigger>
-      <SheetContent side={"left"}>
-        <div className=" p-4">
-          {sections.map((section, idx) => (
-            <div key={idx} className="flex flex-col pb-2">
-              {section.items ? (
-                <h4 className="pb-1 text-xl font-semibold">{section.title}</h4>
-              ) : (
-                <h3 className="pb-2 text-2xl font-bold">{section.title}</h3>
-              )}
-              {section.items && (
-                <ol className="rounded bg-neutral-200 py-2">
-                  {section.items.map((item, itemIdx) => (
-                    <li
-                      key={itemIdx}
-                      className="border-b border-neutral-300 py-2 pl-2 text-lg last:border-0"
-                    >
-                      {item}
-                    </li>
-                  ))}
-                </ol>
-              )}
+          <div className="flex-1 overflow-auto py-2">
+            <nav className="grid items-start px-4 text-sm font-medium">
+            <Link
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-white"
+              href="#"
+            >
+              <IconHome className="h-4 w-4" />
+              DashBoard
+            </Link>
+            <Link
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-white"
+              href="#"
+            >
+              <InfoIcon className="h-4 w-4" />
+              Class Information
+            </Link>
+            <Link
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-white"
+              href="#"
+            >
+              <BellIcon className="h-4 w-4" />
+              Notifications
+            </Link>
+            <Link
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-white"
+              href="#"
+            >
+              <IconUsers className="h-4 w-4" />
+              Profile
+            </Link>
+            <Link
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-white"
+              href="#"
+            >
+              <IconSettings className="h-4 w-4" />
+              Settings
+            </Link>
+            </nav>
+          </div>
+        </div>
+      </div>
+      <div className="flex flex-col">
+        <header className="flex h-14 lg:h-[60px] items-center gap-4 border-b bg-zinc-100/40 px-6 dark:bg-zinc-800/40">
+          <Link className="lg:hidden" href="#">
+            <IconPackage2 className="h-6 w-6" />
+            <span className="sr-only">Home</span>
+          </Link>
+          <div className="ml-auto flex items-center gap-4">
+            <div>
+              <UserButton afterSignOutUrl="/" />
             </div>
-          ))}
-        </div>
-      </SheetContent>
-    </Sheet>
-  );
-};
-
-// ... (previous imports)
-
-// Dashboard component
-export default function Dashboard() {
-  const [notebooks, setNotebooks] = useState<Note[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchNotebooks = async () => {
-      // Fetch notebooks from the API or another source
-      // For now, using the hardcoded data dumNotes
-      setNotebooks(dumNotes);
-      setIsLoading(false);
-    };
-
-    if (typeof window !== "undefined") {
-      fetchNotebooks();
-    }
-  }, []);
-
-  return (
-    <div className="h-full relative">
-      <div className="bg-goodpink p-4 mb-4 text-white">
-        <Link href="../note-taker">
-          <h1 className="text-2xl font-bold text-black">
-            General Physics Lab
-          </h1>
-        </Link>
-        {/* Add a line below the title */}
-        <div className="border-b-2 border-black my-2"></div>
+          </div>
+        </header>
+        <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <Card>
+            <CardContent>
+              <img
+                alt="Placeholder"
+                className="w-full h-1/2 object-cover rounded-lg p-0 m-0"
+                height="200"
+                src="/E1.png"
+                style={{
+                  aspectRatio: "1.6",  // Set the aspect ratio here
+                  objectFit: "cover",
+                }}
+                width="200"
+              />
+              <CardHeader className="flex flex-row items-center justify-between pt-2 space-y-0">
+                <CardTitle className="text-sm font-medium">Experiment 1</CardTitle>
+              </CardHeader>
+              <div className="text-2xl font-bold">Data Analysis with Spreadsheets</div>
+            </CardContent>
+          </Card>
+            <Card>
+              <CardContent>
+              <img
+                  alt="Experiment 1"
+                  className="w-full h-1/2 object-cover rounded-lg p-0 m-0"
+                  src="/E1.png"
+                  style={{
+                    aspectRatio: "1.6",  // Set the aspect ratio here (16:9 is a common widescreen aspect ratio)
+                    objectFit: "cover",
+                  }}
+                />
+                <CardHeader className="flex flex-row items-center justify-between pt-2 space-y-0">
+                  <CardTitle className="text-sm font-medium">Experiment 2</CardTitle>
+                </CardHeader>
+                <div className="text-2xl font-bold">Motion in One Dimension</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent>
+                <img
+                  alt="Placeholder"
+                  className="w-full h-1/2 object-cover rounded-lg p-0 m-0"
+                  height="200"
+                  src="/E3.png"
+                  style={{
+                    aspectRatio: "1.6",
+                    objectFit: "cover",
+                  }}
+                  width="200"
+                />
+                <CardHeader className="flex flex-row items-center justify-between pt-2 space-y-0">
+                  <CardTitle className="text-sm font-medium">Experiment 3</CardTitle>
+                </CardHeader>
+                <div className="text-2xl font-bold">The Glucometer: A Study in Uncertainty</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent>
+                <img
+                  alt="Placeholder"
+                  className="w-full h-1/2 object-cover rounded-lg p-0 m-0"
+                  height="200"
+                  src="/E4.png"
+                  style={{
+                    aspectRatio: "1.6",
+                    objectFit: "cover",
+                  }}
+                  width="200"
+                />
+                <CardHeader className="flex flex-row items-center justify-between pt-2 space-y-0">
+                  <CardTitle className="text-sm font-medium">Experiment 4</CardTitle>
+                </CardHeader>
+                <div className="text-2xl font-bold">Distraction and Reaction Time</div>
+              </CardContent>
+            </Card>
+          </div>
+        </main>
       </div>
-      <div className="absolute left-5 h-full pr-5 pt-5 flex items-center"> {/* Add flex and items-center to center the Sidebar and the vertical line */}
-        {/* Add a black vertical line extending downward */}
-
-        {/* Render the Sidebar component */}
-        <Sidebar />
-      </div>
-      <main className="w-full md:pl-64 flex justify-center items-center"> {/* Add flex and justify-center to center the content */}
-        <div>
-          <NotebookPreview notebooks={dumNotes} />
-        </div>
-      </main>
     </div>
-  );
+  )
+}
+
+function IconBell(props) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+      <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+    </svg>
+  )
 }
 
 
+function IconHome(props) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+      <polyline points="9 22 9 12 15 12 15 22" />
+    </svg>
+  )
+}
 
 
+function IconPackage2(props) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z" />
+      <path d="m3 9 2.45-4.9A2 2 0 0 1 7.24 3h9.52a2 2 0 0 1 1.8 1.1L21 9" />
+      <path d="M12 3v6" />
+    </svg>
+  )
+}
 
 
+function IconPlus(props) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path d="M5 12h14" />
+      <path d="M12 5v14" />
+    </svg>
+  )
+}
+
+
+function IconSettings(props) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  )
+}
+
+
+function IconUsers(props) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    </svg>
+  )
+}
