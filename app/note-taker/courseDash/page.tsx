@@ -86,67 +86,111 @@ export default function Component() {
                 }}
                 width="200"
               />
-              <CardHeader className="flex flex-row items-center justify-between pt-2 space-y-0">
-                <CardTitle className="text-sm font-medium">Experiment 1</CardTitle>
-              </CardHeader>
-              <div className="text-2xl font-bold">Data Analysis with Spreadsheets</div>
+              <div className="status-container flex items-center justify-center mt-2"> 
+                <div className="text-lg font-bold">
+                  Experiment 1
+                </div>
+              </div>
+              <div className="status-container flex items-center justify-center mt-2"> 
+                <div className="text-lg">
+                  Data Analysis with Spreadsheets
+                </div>
+              </div>
+              <div className="status-container flex items-center justify-center mt-2">
+                <div className="text-lg mt-2 border rounded-md p-1 border-black inline-block">
+                  Completed {/* Change the status dynamically based on your logic */}
+                </div>
+              </div> 
             </CardContent>
           </Card>
-            <Card>
-              <CardContent>
+          <Card>
+            <CardContent>
+            <img
+                alt="Experiment 1"
+                className="w-full h-1/2 object-cover rounded-lg p-0 m-0"
+                src="/E2.png"
+                style={{
+                  aspectRatio: "1.6",  // Set the aspect ratio here (16:9 is a common widescreen aspect ratio)
+                  objectFit: "cover",
+                }}
+            />
+              <div className="status-container flex items-center justify-center mt-2"> 
+                <div className="text-lg font-bold">
+                  Experiment 2
+                </div>
+              </div>
+              <div className="status-container flex items-center justify-center mt-2"> 
+                <div className="text-lg">
+                  Motion in One Dimension
+                </div>
+              </div>
+              <div className="status-container flex items-center justify-center mt-2">
+                <div className="text-lg mt-2 border rounded-md p-1 border-black inline-block">
+                  Completed {/* Change the status dynamically based on your logic */}
+                </div>
+              </div> 
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent>
               <img
-                  alt="Experiment 1"
-                  className="w-full h-1/2 object-cover rounded-lg p-0 m-0"
-                  src="/E1.png"
-                  style={{
-                    aspectRatio: "1.6",  // Set the aspect ratio here (16:9 is a common widescreen aspect ratio)
-                    objectFit: "cover",
-                  }}
-                />
-                <CardHeader className="flex flex-row items-center justify-between pt-2 space-y-0">
-                  <CardTitle className="text-sm font-medium">Experiment 2</CardTitle>
-                </CardHeader>
-                <div className="text-2xl font-bold">Motion in One Dimension</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent>
-                <img
-                  alt="Placeholder"
-                  className="w-full h-1/2 object-cover rounded-lg p-0 m-0"
-                  height="200"
-                  src="/E3.png"
-                  style={{
-                    aspectRatio: "1.6",
-                    objectFit: "cover",
-                  }}
-                  width="200"
-                />
-                <CardHeader className="flex flex-row items-center justify-between pt-2 space-y-0">
-                  <CardTitle className="text-sm font-medium">Experiment 3</CardTitle>
-                </CardHeader>
-                <div className="text-2xl font-bold">The Glucometer: A Study in Uncertainty</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent>
-                <img
-                  alt="Placeholder"
-                  className="w-full h-1/2 object-cover rounded-lg p-0 m-0"
-                  height="200"
-                  src="/E4.png"
-                  style={{
-                    aspectRatio: "1.6",
-                    objectFit: "cover",
-                  }}
-                  width="200"
-                />
-                <CardHeader className="flex flex-row items-center justify-between pt-2 space-y-0">
-                  <CardTitle className="text-sm font-medium">Experiment 4</CardTitle>
-                </CardHeader>
-                <div className="text-2xl font-bold">Distraction and Reaction Time</div>
-              </CardContent>
-            </Card>
+                alt="Placeholder"
+                className="w-full h-1/2 object-cover rounded-lg p-0 m-0"
+                height="200"
+                src="/E3.png"
+                style={{
+                  aspectRatio: "1.6",
+                  objectFit: "cover",
+                }}
+                width="200"
+              />
+              <div className="status-container flex items-center justify-center mt-2"> 
+                <div className="text-lg font-bold">
+                  Experiment 3
+                </div>
+              </div>
+              <div className="status-container flex items-center justify-center mt-2"> 
+                <div className="text-lg">
+                The Glucometer: A Study in Uncertainty
+                </div>
+              </div>
+              <div className="status-container flex items-center justify-center mt-2">
+                <div className="text-lg mt-2 border rounded-md p-1 border-black inline-block">
+                  Completed {/* Change the status dynamically based on your logic */}
+                </div>
+              </div> 
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent>
+              <img
+                alt="Placeholder"
+                className="w-full h-1/2 object-cover rounded-lg p-0 m-0"
+                height="200"
+                src="/E4.png"
+                style={{
+                  aspectRatio: "1.6",
+                  objectFit: "cover",
+                }}
+                width="200"
+              />
+              <div className="status-container flex items-center justify-center mt-2"> 
+                <div className="text-lg font-bold">
+                  Experiment 4
+                </div>
+              </div>
+              <div className="status-container flex items-center justify-center mt-2"> 
+                <div className="text-lg">
+                Distraction and Reaction Time
+                </div>
+              </div>
+              <div className="status-container flex items-center justify-center mt-2">
+                <div className="text-lg mt-2 border rounded-md p-1 border-black inline-block">
+                  Completed {/* Change the status dynamically based on your logic */}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
           </div>
         </main>
       </div>
