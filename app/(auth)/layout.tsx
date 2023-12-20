@@ -11,3 +11,6 @@ const AuthLayout = ({
 }
 
 export default AuthLayout;
+
+//maybe need to use "server only" wherever db is used? ok actually still not sure
+//downgrade nextjs
